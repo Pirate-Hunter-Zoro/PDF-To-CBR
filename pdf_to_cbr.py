@@ -6,10 +6,18 @@ def pdf_to_cbr(pdf_path, output_name="output.cbr"):
     temp_dir = "comic_images"
     os.makedirs(temp_dir, exist_ok=True)
 
-    print("Converting PDF to images...")
-    images = convert_from_path(pdf_path)
+    try:
+        print("Converting PDF to images...")
+        images = convert_from_path(pdf_path, thread_count=4)
+        print(f"Total pages converted: {len(images)}")
+    except Exception as e:
+        print("PDF to image conversion failed:", e)
+        return
+
     for i, img in enumerate(images):
-        img.save(f"{temp_dir}/{i:03}.jpg", "JPEG")
+        img_path = os.path.join(temp_dir, f"{i:03}.jpg")
+        print(f"Saving page {i + 1} to {img_path}")
+        img.save(img_path, "JPEG")
 
     print("Creating .cbr archive...")
     with zipfile.ZipFile("temp.zip", "w") as zipf:
@@ -24,4 +32,4 @@ def pdf_to_cbr(pdf_path, output_name="output.cbr"):
     # shutil.rmtree(temp_dir)
 
 # Example usage
-pdf_to_cbr("Shuna's Journey (Hayao Miyazaki) (2022).pdf", "Shuna\'s Journey.cbr")
+pdf_to_cbr("Shuna's Journey (Hayao Miyazaki) (2022).pdf", "Shuna's Journey.cbr")
